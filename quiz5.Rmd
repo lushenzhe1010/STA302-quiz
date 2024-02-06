@@ -1,0 +1,85 @@
+---
+title: "quiz5"
+output: pdf_document
+date: "2024-02-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+# Setting seed for reproducibility
+set.seed(42)
+
+# Number of days
+days <- 100
+
+# Simulate reading pages for each undergraduate, assuming independence
+matt <- rnorm(days, mean=30, sd=10)
+ash <- rnorm(days, mean=50, sd=15)
+jacki <- rnorm(days, mean=20, sd=5)
+rol <- rnorm(days, mean=45, sd=10)
+mike <- rnorm(days, mean=40, sd=20)
+
+# Ensuring no negative page counts
+matt <- ifelse(matt < 0, 0, matt)
+ash <- ifelse(ash < 0, 0, ash)
+jacki <- ifelse(jacki < 0, 0, jacki)
+rol <- ifelse(rol < 0, 0, rol)
+mike <- ifelse(mike < 0, 0, mike)
+
+# Creating a data frame
+data <- data.frame(Day=1:days, Matt=matt, Ash=ash, Jacki=jacki, Rol=rol, Mike=mike)
+
+# Performing five tests based on the simulated data
+
+# 1. Test for normality for Matt's reading pattern
+shapiro.test(data$Matt)
+
+# 2. Test for normality for Ash's reading pattern
+shapiro.test(data$Ash)
+
+# 3. Correlation test between Matt and Ash (expecting low correlation due to independence)
+cor.test(data$Matt, data$Ash)
+
+# 4. Variance analysis - ANOVA to compare means across all undergraduates
+anova(lm(cbind(Matt, Ash, Jacki, Rol, Mike) ~ Day, data=data))
+
+# 5. Pairwise comparison of mean pages read per day between all undergraduates using Tukey's HSD test
+
+install.packages("reshape2")
+library(reshape2)
+data_long <- melt(data, id.vars = "Day", variable.name = "Undergraduate", value.name = "Pages")
+
+# ANOVA to compare means across all undergraduates
+model <- aov(Pages ~ Undergraduate, data=data_long)
+summary(model)
+
+# Tukey's HSD test for pairwise comparison between all undergraduates
+TukeyHSD(model)
+
+
+```
+
